@@ -116,7 +116,7 @@ namespace WatchMate_API.Controllers
                 return StatusCode(500, new { StatusCode = 500, message = "An error occurred.", error = ex.Message });
             }
         }
-
+        //test one
 
         [HttpPost]
         [Route("registration")]
