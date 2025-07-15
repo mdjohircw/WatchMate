@@ -22,7 +22,7 @@ namespace WatchMate_API.Entities
         public decimal? PerAdReward { get; set; }
 
         [Required]
-        public byte? IsActive { get; set; }
+        public byte? Status { get; set; }
         public DateTime? CreatedAt { get; set; }
         public int? CreatedBy { get; set; }
         public DateTime? UpdatedAt { get; set; }

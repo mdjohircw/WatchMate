@@ -12,8 +12,11 @@ namespace WatchMate_API.DTO.Settings
         [Required]
         public int PackageId { get; set; }
 
-        public bool IsActive { get; set; } = true;
+        public  byte Status { get; set; }
 
-        
+        public int? PayMethodID { get; set; }
+        public string? TransctionCode { get; set; }
+
+
     }
 }

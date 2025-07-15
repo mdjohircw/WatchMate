@@ -1,4 +1,5 @@
-﻿using WatchMate_API.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using WatchMate_API.Entities;
 using WatchMate_API.Repository;
 
 namespace WatchMate_API.Implementation
@@ -39,6 +40,37 @@ namespace WatchMate_API.Implementation
 
             // Return public URL
             return $"{request.Scheme}://{request.Host}/videos/{fileName}";
+        }
+
+        public async Task<IEnumerable<object>> GetCustomerAdVideos(int customerId)
+        {
+            var currentDate = DateTime.Now;
+
+            var videos = await (from cp in _dbContext.CustomerPackage
+                                join p in _dbContext.Package on cp.PackageId equals p.PackageId
+                                join ci in _dbContext.CustomerInfo on cp.CustomerId equals ci.CustomerId
+                                join v in _dbContext.AdVideo on 1 equals 1
+                                where cp.CustomerId == customerId
+                                    && cp.Status == 1
+                                    && cp.ExpiryDate >= currentDate
+                                    && v.IsActive == true
+                                    && v.StartDate <= currentDate
+                                    && v.EndDate >= currentDate
+                                    && (("," + v.PackageIds + ",").Contains("," + cp.PackageId.ToString() + ","))
+                                select new
+                                {
+                                    ci.CustomerId,
+                                    ci.CustCardNo,
+                                    ci.FullName,
+                                    p.PackageName,
+                                    v.Title,
+                                    v.VideoUrl,
+                                    v.RewardPerView,
+                                    v.StartDate,
+                                    v.EndDate
+                                }).ToListAsync();
+
+            return videos;
         }
     }
 }

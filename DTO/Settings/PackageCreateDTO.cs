@@ -18,7 +18,7 @@ namespace WatchMate_API.DTO.Settings
         public decimal? PerAdReward { get; set; }
 
         [Required]
-        public byte? IsActive { get; set; }
+        public byte? Status { get; set; }
         public int? UserId { get; set; }
     }
 }

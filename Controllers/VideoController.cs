@@ -46,6 +46,24 @@ namespace WatchMate_API.Controllers
                 return StatusCode(500, new { StatusCode = 500, message = "An error occurred", error = ex.Message });
             }
         }
+        [HttpGet]
+        [Route("videos/{customerId}")]
+        public async Task<IActionResult> GetAdVideos(int customerId)
+        {
+            try
+            {
+                var videos = await _unitOfWork.Video.GetCustomerAdVideos(customerId);
+
+                if (videos == null || !videos.Any())
+                    return NotFound(new { StatusCode = 404, message = "Ad videos not found." });
+
+                return Ok(new { StatusCode = 200, message = "Success", data = videos });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { StatusCode = 500, message = "An error occurred", error = ex.Message });
+            }
+        }
 
 
         [HttpGet]

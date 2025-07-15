@@ -78,6 +78,68 @@ namespace WatchMate_API.Controllers
                 return StatusCode(500, new { StatusCode = 500, message = "Error retrieving user package", error = ex.Message });
             }
         }
+        [HttpPut("package/approve/{id}")]
+        public async Task<IActionResult> ApprovePackageRequest(int id, byte Status, int userId)
+        {
+            using var transaction = await _unitOfWork.BeginTransactionAsync();
+            try
+            {
+                var packageRequest = await _unitOfWork.UserPackages.GetByIdAsync(id);
+                if (packageRequest == null)
+                    return NotFound(new { StatusCode = 404, Message = $"Package request with ID {id} not found." });
+
+                if (packageRequest.Status == 1) // already active
+                    return BadRequest(new { StatusCode = 400, Message = "Package request already approved/active." });
+
+                if (Status == 2)
+                {
+                    packageRequest.Status = 2; // Rejected
+                    packageRequest.UpdatedAt = DateTime.UtcNow;
+                    packageRequest.UpdatedBy = userId;
+                    await _unitOfWork.UserPackages.UpdateAsync(packageRequest);
+
+                    await _unitOfWork.Save();
+                    await transaction.CommitAsync();
+
+                    return Ok(new { StatusCode = 200, Message = "Package request rejected successfully." });
+                }
+
+                // ✅ Approval Process
+                packageRequest.Status = 1; // Active
+                packageRequest.StartDate = DateTime.UtcNow;
+                packageRequest.ExpiryDate = DateTime.UtcNow.AddDays(30); // Optional: can be based on package validity
+                packageRequest.UpdatedAt = DateTime.UtcNow;
+                packageRequest.UpdatedBy = userId;
+                await _unitOfWork.UserPackages.UpdateAsync(packageRequest);
+
+                // ✅ Add Transaction Record
+                var transactionRecord = new Transctions
+                {
+                    TransactionType = 4, // example: 4 = Package Purchase
+                    Amount = packageRequest.PackagePrice,
+                    TransactionDate = DateTime.UtcNow,
+                    UserId = packageRequest.CustomerId,
+                    PaytMethodID = packageRequest.PayMethodID ?? 0,
+                    Remarks = $"Package purchase approved for request ID {packageRequest.Id}"
+                };
+                await _unitOfWork.Transaction.AddAsync(transactionRecord);
+
+                await _unitOfWork.Save();
+                await transaction.CommitAsync();
+
+                return Ok(new { StatusCode = 200, Message = "Package approved and activated successfully." });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                return StatusCode(500, new
+                {
+                    StatusCode = 500,
+                    Message = "An error occurred while approving the package request.",
+                    Error = ex.Message
+                });
+            }
+        }
 
         [HttpPost]
         [Route("create")]
@@ -107,9 +169,11 @@ namespace WatchMate_API.Controllers
                     PackageId = dto.PackageId,
                     StartDate = startDate,
                     ExpiryDate = (DateTime)expiryDate,
-                    IsActive = dto.IsActive,
+                    Status = 0,
                     CreatedAt = DateTime.Now,
-                    CreatedBy = dto.UserId
+                    CreatedBy = dto.UserId,
+                    PayMethodID = dto.PayMethodID,
+                    TransctionCode =dto.TransctionCode,
                 };
 
                 await _unitOfWork.UserPackages.AddAsync(userPackage);
@@ -145,9 +209,10 @@ namespace WatchMate_API.Controllers
                 existing.CustomerId = dto.CustomerId;
                 existing.PackageId = dto.PackageId;
                 existing.StartDate = DateTime.Now;
-                existing.IsActive = dto.IsActive;
+                existing.Status = dto.Status;
                 existing.UpdatedAt = DateTime.Now;
                 existing.UpdatedBy=dto.UserId;
+                existing.PayMethodID = dto.PayMethodID;
 
                 await _unitOfWork.UserPackages.UpdateAsync(existing);
                 await _unitOfWork.Save();

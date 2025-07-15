@@ -13,5 +13,9 @@ namespace WatchMate_API.Entities
         public DbSet<CustomerPackage> CustomerPackage { get; set; }
         public DbSet<CustomerInfo> CustomerInfo { get; set; }
         public DbSet<AdVideo> AdVideo { get; set; }
+        public DbSet<Transctions> Transctions { get; set; }
+        public DbSet<TransactionType> TransactionType { get; set; }
+        public DbSet<PaymentMethod> PaymentMethod { get; set; }
+
     }
 }

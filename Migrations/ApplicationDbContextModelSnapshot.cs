@@ -167,14 +167,23 @@ namespace WatchMate_API.Migrations
                     b.Property<DateTime>("ExpiryDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
                     b.Property<int>("PackageId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PackagePrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("PayMethodID")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("StartDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<byte>("Status")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("TransctionCode")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -187,6 +196,8 @@ namespace WatchMate_API.Migrations
                     b.HasIndex("CustomerId");
 
                     b.HasIndex("PackageId");
+
+                    b.HasIndex("PayMethodID");
 
                     b.ToTable("CustomerPackage");
                 });
@@ -214,9 +225,6 @@ namespace WatchMate_API.Migrations
                     b.Property<int?>("DeletedBy")
                         .HasColumnType("int");
 
-                    b.Property<byte>("IsActive")
-                        .HasColumnType("tinyint");
-
                     b.Property<int?>("MaxDailyViews")
                         .HasColumnType("int");
 
@@ -234,6 +242,9 @@ namespace WatchMate_API.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<byte>("Status")
+                        .HasColumnType("tinyint");
+
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
@@ -246,6 +257,110 @@ namespace WatchMate_API.Migrations
                     b.HasKey("PackageId");
 
                     b.ToTable("Package");
+                });
+
+            modelBuilder.Entity("WatchMate_API.Entities.PaymentMethod", b =>
+                {
+                    b.Property<int>("PayMethodID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PayMethodID"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
+
+                    b.HasKey("PayMethodID");
+
+                    b.ToTable("PaymentMethod");
+                });
+
+            modelBuilder.Entity("WatchMate_API.Entities.TransactionType", b =>
+                {
+                    b.Property<int>("TransactionTypeID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TransactionTypeID"));
+
+                    b.Property<string>("Category")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsCredit")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("TransactionTypeID");
+
+                    b.ToTable("TransactionType");
+                });
+
+            modelBuilder.Entity("WatchMate_API.Entities.Transctions", b =>
+                {
+                    b.Property<int>("TransctionID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TransctionID"));
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("PaytMethodID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Remarks")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("TransactionDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TransactionType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("TransctionID");
+
+                    b.ToTable("Transctions");
                 });
 
             modelBuilder.Entity("WatchMate_API.Entities.UserRoles", b =>
@@ -420,9 +535,15 @@ namespace WatchMate_API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("WatchMate_API.Entities.PaymentMethod", "PaymentMethod")
+                        .WithMany()
+                        .HasForeignKey("PayMethodID");
+
                     b.Navigation("CustomerInfo");
 
                     b.Navigation("Package");
+
+                    b.Navigation("PaymentMethod");
                 });
 #pragma warning restore 612, 618
         }
