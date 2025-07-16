@@ -28,7 +28,7 @@ namespace WatchMate_API.Controllers
         }
 
         [HttpGet]
-        [Route("user-packages")]
+        [Route("packages")]
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public async Task<IActionResult> GetUserPackages()
         {
@@ -55,7 +55,7 @@ namespace WatchMate_API.Controllers
         }
 
         [HttpGet]
-        [Route("user-package/{id}")]
+        [Route("package/{id}")]
         public async Task<IActionResult> GetUserPackage(int id)
         {
             try
@@ -107,7 +107,7 @@ namespace WatchMate_API.Controllers
                 // ✅ Approval Process
                 packageRequest.Status = 1; // Active
                 packageRequest.StartDate = DateTime.UtcNow;
-                packageRequest.ExpiryDate = DateTime.UtcNow.AddDays(30); // Optional: can be based on package validity
+                packageRequest.ExpiryDate = DateTime.UtcNow.AddDays(30); 
                 packageRequest.UpdatedAt = DateTime.UtcNow;
                 packageRequest.UpdatedBy = userId;
                 await _unitOfWork.UserPackages.UpdateAsync(packageRequest);
@@ -167,6 +167,7 @@ namespace WatchMate_API.Controllers
                 {
                     CustomerId = dto.CustomerId,
                     PackageId = dto.PackageId,
+                    PackagePrice = package.Price,
                     StartDate = startDate,
                     ExpiryDate = (DateTime)expiryDate,
                     Status = 0,
