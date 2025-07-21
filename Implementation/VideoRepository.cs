@@ -51,7 +51,6 @@ namespace WatchMate_API.Implementation
                                 join ci in _dbContext.CustomerInfo on cp.CustomerId equals ci.CustomerId
                                 join v in _dbContext.AdVideo on 1 equals 1
                                 where cp.CustomerId == customerId
-                                    && cp.Status == 1
                                     && cp.ExpiryDate >= currentDate
                                     && v.IsActive == true
                                     && v.StartDate <= currentDate
@@ -69,6 +68,7 @@ namespace WatchMate_API.Implementation
                                     v.StartDate,
                                     v.EndDate
                                 }).ToListAsync();
+
 
             return videos;
         }

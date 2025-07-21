@@ -182,7 +182,20 @@ namespace WatchMate_API.Implementation
 
             }
                 });
+                menu.Add(new
+                {
+                    path = "",
+                    title = "Task",
+                    iconType = "nzIcon",
+                    iconTheme = "outline",
+                    icon = "wallet",
+                    submenu = new List<object>
+            {
+                new { path = "task/my-task", title = "My Task", iconType = "", icon = "", iconTheme = "", submenu = new List<object>() },
+                //new { path = "userPackages/package-list", title = "Packages List", iconType = "", icon = "", iconTheme = "", submenu = new List<object>() },
 
+            }
+                });
                 // Custommer
 
 

@@ -48,6 +48,10 @@ namespace WatchMate_API.Controllers
                 var users = _unitOfWork.Login.GetLoginInfo(loginDTO.UserName, loginDTO.UserPassword);
                 var _user = users.FirstOrDefault();
 
+
+                var Customer = _unitOfWork.Login.GetCustomerInfoByUserId(_user.UserId);
+                var _userCustomer = users.FirstOrDefault();
+
                 if (_user == null)
                 {
                     return NotFound(new { StatusCode = 404, message = "User not found or invalid credentials." });
@@ -86,7 +90,7 @@ namespace WatchMate_API.Controllers
                         RoleName = userRole.UserRoleName,
                         Email = u.Email,
                         IsGuestUser = u.IsGuestUser,
-                        CustomerID = u.ReferenceID,
+                        CustomerID = Customer.CustomerId.ToString(),
                         AdditionalPermissions = u.AdditionalPermissions,
                         RemovedPermissions = u.RemovedPermissions,
                         IsAdministrator = u.IsAdministrator,

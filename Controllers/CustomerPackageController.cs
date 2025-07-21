@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using WatchMate_API.DTO.Customer;
 using WatchMate_API.DTO.Settings;
 using WatchMate_API.Entities;
 using WatchMate_API.Repository;
@@ -78,6 +79,32 @@ namespace WatchMate_API.Controllers
                 return StatusCode(500, new { StatusCode = 500, message = "Error retrieving user package", error = ex.Message });
             }
         }
+
+        [HttpGet("get-customer-package/{customerId}")]
+        public async Task<IActionResult> GetCustomerPackages(int customerId)
+        {
+            try
+            {
+                string cacheKey = $"customer_package_{customerId}";
+                if (!_cache.TryGetValue(cacheKey, out List<CustomerPackageDTO> cachedData))
+                {
+                    var result = await _unitOfWork.UserPackages.GetCustomerPackageByCustomerId(customerId);
+
+                    if (result == null || !result.Any())
+                        return NotFound(new { StatusCode = 404, message = "Customer package not found." });
+
+                    _cache.Set(cacheKey, result, TimeSpan.FromMinutes(1));
+                    return Ok(new { StatusCode = 200, message = "Success", data = result });
+                }
+
+                return Ok(new { StatusCode = 200, message = "Success (Cache)", data = cachedData });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { StatusCode = 500, message = "Error retrieving customer packages", error = ex.Message });
+            }
+        }
+
         [HttpPut("package/approve/{id}")]
         public async Task<IActionResult> ApprovePackageRequest(int id, byte Status, int userId)
         {
