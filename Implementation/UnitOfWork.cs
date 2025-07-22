@@ -26,6 +26,7 @@ namespace WatchMate_API.Implementation
             CustomerInfo = new CustomerlInfoRepository(_dbContext, _httpContextAccessor);
             Video = new VideoRepository(_dbContext, _httpContextAccessor);
             Transaction = new TransctionRepository(_dbContext, _httpContextAccessor);
+            Account = new AccountRepository(_dbContext);
 
         }
         public IUserRepository User { get; private set; }
@@ -36,6 +37,7 @@ namespace WatchMate_API.Implementation
         public ICustomerlInfoRepository CustomerInfo { get; private set; }
         public IVideoRepository Video { get; private set; }
         public ITransctionRepository Transaction { get; private set; }
+        public IAccountRepository Account { get; private set; }
 
         public async Task<IDbContextTransaction> BeginTransactionAsync()
         {

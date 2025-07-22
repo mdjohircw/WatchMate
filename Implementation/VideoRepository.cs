@@ -49,6 +49,7 @@ namespace WatchMate_API.Implementation
             var videos = await (from cp in _dbContext.CustomerPackage
                                 join p in _dbContext.Package on cp.PackageId equals p.PackageId
                                 join ci in _dbContext.CustomerInfo on cp.CustomerId equals ci.CustomerId
+                                join ac in _dbContext.AccountBalance on cp.CustomerId equals ac.CustomerId
                                 join v in _dbContext.AdVideo on 1 equals 1
                                 where cp.CustomerId == customerId
                                     && cp.ExpiryDate >= currentDate
@@ -65,8 +66,14 @@ namespace WatchMate_API.Implementation
                                     v.Title,
                                     v.VideoUrl,
                                     v.RewardPerView,
+                                    p.PerAdReward,
+                                    p.MinDailyViews,
+                                    p.MaxDailyViews,
                                     v.StartDate,
-                                    v.EndDate
+                                    v.EndDate,
+                                    cp.PackageId,
+                                    ac.Id,
+                                    p.PerDayReward,
                                 }).ToListAsync();
 
 

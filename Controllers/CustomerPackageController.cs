@@ -142,7 +142,7 @@ namespace WatchMate_API.Controllers
                 // ✅ Add Transaction Record
                 var transactionRecord = new Transctions
                 {
-                    TransactionType = 4, // example: 4 = Package Purchase
+                    TransactionType = 4, 
                     Amount = packageRequest.PackagePrice,
                     TransactionDate = DateTime.UtcNow,
                     UserId = packageRequest.CustomerId,

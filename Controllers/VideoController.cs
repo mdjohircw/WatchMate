@@ -85,6 +85,50 @@ namespace WatchMate_API.Controllers
                 return StatusCode(500, new { StatusCode = 500, message = "An error occurred", error = ex.Message });
             }
         }
+        [HttpPost]
+        [Route("videos/reward")]
+        public async Task<IActionResult> AddVideoReward(int customerId, int accountNo, decimal perAdReward)
+        {
+            try
+            {
+                // ✅ Optional: validate if customer exists
+                var customer = await _unitOfWork.CustomerInfo.GetByIdAsync(customerId);
+                if (customer == null)
+                    return NotFound(new { StatusCode = 404, message = "Customer not found." });
+
+                // ✅ Get AccountBalance record
+                var accountBalance = await _unitOfWork.Account.GetByIdAsync(accountNo);
+
+                if (accountBalance == null)
+                    return NotFound(new { StatusCode = 404, message = "Account balance not found." });
+
+                // ✅ Add reward
+                accountBalance.BalanceAmount += perAdReward;
+                accountBalance.UpdatedAt = DateTime.Now;
+
+                await _unitOfWork.Account.UpdateAsync(accountBalance);
+
+
+                await _unitOfWork.Save();
+                var transactionRecord = new Transctions
+                {
+                    TransactionType = 2,
+                    Amount = perAdReward,
+                    TransactionDate = DateTime.UtcNow,
+                    CustomerId = customerId,
+                    Remarks = $"Reward earned from watching advertisements. Customer ID {customerId}"
+                };
+
+                await _unitOfWork.Transaction.AddAsync(transactionRecord);
+
+                await _unitOfWork.Save();
+                return Ok(new { StatusCode = 200, message = "Reward added successfully", rewardAmount = perAdReward, totalBalance = accountBalance.BalanceAmount });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { StatusCode = 500, message = "An error occurred", error = ex.Message });
+            }
+        }
 
         [HttpPost("create")]
         [RequestSizeLimit(524288000)]

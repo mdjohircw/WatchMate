@@ -181,7 +181,17 @@ namespace WatchMate_API.Controllers
                         UserId = user.UserId
                     };
 
-                    await _unitOfWork.CustomerInfo.AddAsync(customerInfo);
+                  var newCustomer = await _unitOfWork.CustomerInfo.AddAsyncReturn(customerInfo);
+                    await _unitOfWork.Save();
+                    var account = new AccountBalance
+                    {
+                        CustomerId = newCustomer.CustomerId, 
+                        AccountNo = await _unitOfWork.Account.GenerateUniqueAccountNumberAsync(),
+                        BalanceAmount = 0,
+                        IsActive = 1,
+                        CreatedAt = DateTime.Now
+                    };
+                    await _unitOfWork.Account.AddAsync(account);
                     await _unitOfWork.Save(); // Save customer info
 
                     await transaction.CommitAsync(); // ✅ Commit transaction
